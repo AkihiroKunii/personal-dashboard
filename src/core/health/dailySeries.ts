@@ -1,15 +1,10 @@
 import { db } from '../db';
 import { enumerateDates, parseIsoWithOffset } from '../dates';
-import type { DailyMetricRow } from '../types';
+import type { DailyMetricRow, SeriesPoint } from '../types';
 import { pickPreferred } from './sources';
 import { dailySleepBySource } from './sleepSessions';
 
-export interface SeriesPoint {
-  date: string;
-  value: number | null;
-  min?: number;
-  max?: number;
-}
+export type { SeriesPoint };
 
 /** 表示できる指標(V-F1)。sleep のみ sleepRecords からの導出値 */
 export type MetricId = 'sleep' | 'hrvSdnn' | 'restingHr' | 'steps' | 'heartRate';

@@ -32,6 +32,37 @@ export interface SettingRow {
   value: unknown;
 }
 
+/** チャートの日次系列点(欠測日は value: null)。①③④で共用 */
+export interface SeriesPoint {
+  date: string;
+  value: number | null;
+  min?: number;
+  max?: number;
+}
+
+/** 部位(G-F2)。固定6種 */
+export const MUSCLE_GROUPS = ['胸', '背中', '脚', '肩', '腕', 'コア'] as const;
+export type MuscleGroup = (typeof MUSCLE_GROUPS)[number];
+
+/** 種目マスタ(G-F1b)。id は自動採番 */
+export interface ExerciseRow {
+  id?: number;
+  name: string;
+  muscleGroup: MuscleGroup;
+}
+
+/** 1セットの記録(G-F1)。date は記録時刻のJST暦日 */
+export interface GymSetRow {
+  id?: number;
+  exerciseId: number;
+  /** 記録時刻 epoch ms */
+  at: number;
+  /** YYYY-MM-DD(JST) */
+  date: string;
+  weightKg: number;
+  reps: number;
+}
+
 /** パーサの出力。importer が IndexedDB へ冪等保存する */
 export interface ImportResult {
   dailyMetrics: DailyMetricRow[];

@@ -65,6 +65,28 @@ export function TimeSeriesChart({
 
   const hasRightAxis = series.some((s) => s.axis === 'right');
   const gradId = (s: ChartSeriesDef) => `grad-${uid}-${s.id}`;
+
+  // 孤立点(前後が欠測)は線分が描けないため、その点にだけドットを打つ。
+  // ジムの記録(週2〜3回)のような疎な系列で必須
+  const isolatedDot =
+    (s: ChartSeriesDef) =>
+    (props: { cx?: number; cy?: number; index?: number }) => {
+      const i = props.index ?? 0;
+      const val = data[i]?.[s.id];
+      const prev = i > 0 ? data[i - 1][s.id] : null;
+      const next = i < data.length - 1 ? data[i + 1][s.id] : null;
+      const show =
+        val != null && prev == null && next == null && props.cx != null && props.cy != null;
+      return (
+        <circle
+          key={`${s.id}-dot-${i}`}
+          cx={props.cx}
+          cy={props.cy}
+          r={show ? 3 : 0}
+          fill={s.color}
+        />
+      );
+    };
   const formatTick = (date: string) => {
     const [, m, d] = date.split('-');
     return dates.length > 120 && d !== '01' ? '' : `${Number(m)}/${Number(d)}`;
@@ -165,7 +187,7 @@ export function TimeSeriesChart({
                 dataKey={s.id}
                 stroke={s.color}
                 name={s.label}
-                dot={false}
+                dot={isolatedDot(s)}
                 strokeWidth={2}
                 connectNulls={false}
                 type="monotone"
@@ -189,7 +211,7 @@ export function TimeSeriesChart({
               strokeWidth={2}
               fill={`url(#${gradId(s)})`}
               name={s.label}
-              dot={false}
+              dot={isolatedDot(s)}
               connectNulls={false}
               type="monotone"
               isAnimationActive={false}
