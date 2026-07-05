@@ -9,7 +9,7 @@ import { MUSCLE_COLORS } from './muscleColors';
 
 // G-F1 セット記録。§2.2: 3タップ以内(種目タップ→[調整]→記録)、前回値プリセット、即時保存。
 
-const WEIGHT_STEP = 2.5;
+const WEIGHT_STEP = 1;
 
 function Stepper({
   label,
