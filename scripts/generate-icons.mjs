@@ -5,11 +5,21 @@ import sharp from 'sharp';
 
 const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#4f46e5"/>
+  <defs>
+    <linearGradient id="pulse" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.32" r="0.75">
+      <stop offset="0" stop-color="#1d2a4d"/>
+      <stop offset="1" stop-color="#0b1120"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#glow)"/>
   <path d="M64 288 h96 l32 -96 48 160 40 -120 24 56 h144"
-        fill="none" stroke="#ffffff" stroke-width="28"
+        fill="none" stroke="url(#pulse)" stroke-width="30"
         stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="256" cy="120" r="28" fill="#ffffff"/>
+  <circle cx="256" cy="120" r="26" fill="#2dd4bf"/>
 </svg>`;
 
 mkdirSync('public/icons', { recursive: true });

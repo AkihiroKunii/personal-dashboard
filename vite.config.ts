@@ -17,8 +17,8 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/personal-dashboard/',
         scope: '/personal-dashboard/',
-        theme_color: '#4f46e5',
-        background_color: '#f8fafc',
+        theme_color: '#0b1120',
+        background_color: '#0b1120',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },

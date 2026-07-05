@@ -19,7 +19,7 @@ function MetricCard({ metric, from, to }: { metric: MetricId; from: string; to: 
       <h2>
         {def.label}
         {latest && (
-          <span className="latest-value">
+          <span className="latest-value" style={{ color: def.color }}>
             {Math.round(latest.value! * 10) / 10}
             <small>
               {def.unit}({latest.date.slice(5).replace('-', '/')})
