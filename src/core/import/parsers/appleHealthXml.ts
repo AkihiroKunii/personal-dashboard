@@ -2,6 +2,7 @@ import { jstDateOf, parseHealthKitDate } from '../../dates';
 import { mapXmlStage } from '../../health/stageMap';
 import { normalizeSourceName } from '../../health/sources';
 import type { DailyMetricRow, ImportResult, SleepRecordRow } from '../../types';
+import { saveImportResult } from '../importer';
 import type { RegisteredParser } from '../registry';
 
 // Apple標準 export.xml のパーサ(V-F3b)。
@@ -196,5 +197,13 @@ export const appleHealthXmlParser: RegisteredParser = {
   id: 'apple-health-xml',
   displayName: 'ヘルスケア標準エクスポート(export.xml)',
   matches: (fileName) => /\.xml$/i.test(fileName),
-  parse: parseAppleHealthXml,
+  // canParseText は実装しない(数百MBの全文読込を防ぐ。拡張子のみで判定)
+  importFile: async (file, onProgress) => {
+    const summary = await saveImportResult(await parseAppleHealthXml(file, onProgress));
+    const range = summary.dateRange ? `(${summary.dateRange[0]}〜${summary.dateRange[1]})` : '';
+    return {
+      message: `指標${summary.metricCount}件・睡眠${summary.sleepCount}件を保存しました${range}`,
+      warnings: summary.warnings,
+    };
+  },
 };

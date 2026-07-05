@@ -4,52 +4,17 @@ import { useToast } from '../../app/Toast';
 import { db } from '../../core/db';
 import { todayJst } from '../../core/dates';
 import { MUSCLE_GROUPS, type ExerciseRow, type GymSetRow } from '../../core/types';
+import { toggleProtein } from './lib/bodyProtein';
 import { deleteSet, lastSetOf, recordSet, updateSet } from './lib/exercises';
+import { activeProgramOn } from './lib/program';
+import { menuForDate } from './lib/programSchema';
 import { MUSCLE_COLORS } from './muscleColors';
+import { Stepper } from './Stepper';
 
 // G-F1 セット記録。§2.2: 3タップ以内(種目タップ→[調整]→記録)、前回値プリセット、即時保存。
+// G-F6: 当日メニューがある日は種目をプリセット。G-F9: タンパク質の二値トグル。
 
 const WEIGHT_STEP = 1;
-
-function Stepper({
-  label,
-  unit,
-  value,
-  step,
-  min,
-  onChange,
-}: {
-  label: string;
-  unit: string;
-  value: number;
-  step: number;
-  min: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div className="stepper">
-      <span className="stepper-label">{label}</span>
-      <button aria-label={`${label}を減らす`} onClick={() => onChange(Math.max(min, value - step))}>
-        −
-      </button>
-      <input
-        type="number"
-        inputMode="decimal"
-        value={value}
-        min={min}
-        step={step}
-        onChange={(e) => {
-          const n = Number(e.target.value);
-          if (Number.isFinite(n)) onChange(n);
-        }}
-      />
-      <button aria-label={`${label}を増やす`} onClick={() => onChange(value + step)}>
-        +
-      </button>
-      <span className="stepper-unit">{unit}</span>
-    </div>
-  );
-}
 
 export function RecordView() {
   const toast = useToast();
@@ -65,15 +30,26 @@ export function RecordView() {
   const exercises = useLiveQuery(() => db.exercises.toArray(), []) ?? [];
   const todaySets =
     useLiveQuery(() => db.gymSets.where('date').equals(today).sortBy('at'), [today]) ?? [];
-  // 種目チップは最近使った順(履歴がなければマスタ順)
   const recentIds =
     useLiveQuery(async () => {
       const recent = await db.gymSets.orderBy('at').reverse().limit(100).toArray();
       return [...new Set(recent.map((s) => s.exerciseId))].slice(0, 8);
     }, []) ?? [];
+  // G-F6: 当日メニュー(アクティブプログラム)
+  const todayMenu =
+    useLiveQuery(async () => {
+      const program = await activeProgramOn(today);
+      return program ? (menuForDate(program, today) ?? null) : null;
+    }, [today]) ?? null;
+  // G-F9: 今日のタンパク質達成フラグ
+  const proteinDay = useLiveQuery(() => db.proteinDays.get(today), [today]);
+  const proteinTarget =
+    useLiveQuery(async () => (await activeProgramOn(today))?.nutritionTargets?.proteinGramsPerDay, [
+      today,
+    ]) ?? undefined;
 
   const byId = new Map(exercises.map((e) => [e.id!, e]));
-  // 最近使った種目を先頭に、残りはマスタ順で8枠を埋める
+  const byName = new Map(exercises.map((e) => [e.name, e]));
   const recentSet = new Set(recentIds);
   const chipExercises: ExerciseRow[] = [
     ...recentIds.map((id) => byId.get(id)).filter((e): e is ExerciseRow => !!e),
@@ -84,7 +60,6 @@ export function RecordView() {
   const selectExercise = async (id: number) => {
     setSelectedId(id);
     setShowAll(false);
-    // 前回値プリセット(今日すでに記録していればその値が最新=そのまま引き継がれる)
     const last = await lastSetOf(id);
     if (last) {
       setWeight(last.weightKg);
@@ -108,9 +83,12 @@ export function RecordView() {
     setEditReps(s.reps);
   };
 
-  const chip = (e: ExerciseRow) => {
+  const setCountOf = (exerciseId: number) => todaySets.filter((s) => s.exerciseId === exerciseId).length;
+
+  const chip = (e: ExerciseRow, targetSets?: number) => {
     const color = MUSCLE_COLORS[e.muscleGroup];
     const active = e.id === selectedId;
+    const done = setCountOf(e.id!);
     return (
       <button
         key={e.id}
@@ -119,11 +97,15 @@ export function RecordView() {
         onClick={() => void selectExercise(e.id!)}
       >
         {e.name}
+        {targetSets !== undefined && (
+          <span className="chip-badge">
+            {done}/{targetSets}
+          </span>
+        )}
       </button>
     );
   };
 
-  // 当日のセットを種目ごと(初回記録順)にまとめる
   const todayByExercise = new Map<number, GymSetRow[]>();
   for (const s of todaySets) {
     const list = todayByExercise.get(s.exerciseId);
@@ -131,11 +113,46 @@ export function RecordView() {
     else todayByExercise.set(s.exerciseId, [s]);
   }
 
+  const proteinState = proteinDay === undefined ? 'none' : proteinDay.achieved ? 'yes' : 'no';
+
   return (
     <>
+      {todayMenu && (
+        <section className="card menu-card">
+          <h2>
+            今日のメニュー
+            <span className="hint-inline">{todayMenu.focus}</span>
+          </h2>
+          <div className="chip-row wrap">
+            {todayMenu.exercises.map((pe) => {
+              const e = byName.get(pe.name);
+              return e ? (
+                chip(e, pe.sets)
+              ) : (
+                <span key={pe.name} className="chip disabled">
+                  {pe.name}
+                </span>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      <section className="card">
+        <button
+          className={`protein-toggle ${proteinState}`}
+          onClick={() => void toggleProtein(today)}
+        >
+          <span>タンパク質{proteinTarget !== undefined ? ` 目標${proteinTarget}g` : ''}</span>
+          <span className="protein-state">
+            {proteinState === 'yes' ? '✓ 達成' : proteinState === 'no' ? '✕ 未達' : '未記録'}
+          </span>
+        </button>
+      </section>
+
       <section className="card">
         <h2>種目を選ぶ</h2>
-        <div className="chip-row">{chipExercises.map(chip)}</div>
+        <div className="chip-row">{chipExercises.map((e) => chip(e))}</div>
         <button className="link-btn" onClick={() => setShowAll(!showAll)}>
           {showAll ? '閉じる' : 'すべての種目から選ぶ'}
         </button>
@@ -146,7 +163,7 @@ export function RecordView() {
             return (
               <div key={g}>
                 <h3 style={{ color: MUSCLE_COLORS[g] }}>{g}</h3>
-                <div className="chip-row wrap">{list.map(chip)}</div>
+                <div className="chip-row wrap">{list.map((e) => chip(e))}</div>
               </div>
             );
           })}
@@ -163,7 +180,7 @@ export function RecordView() {
           <Stepper label="重量" unit="kg" value={weight} step={WEIGHT_STEP} min={0} onChange={setWeight} />
           <Stepper label="回数" unit="回" value={reps} step={1} min={1} onChange={setReps} />
           <button className="primary-btn" onClick={() => void doRecord()}>
-            記録する(本日 {todayByExercise.get(selected.id!)?.length ?? 0} セット目まで済)
+            記録する(本日 {setCountOf(selected.id!)} セット済)
           </button>
         </section>
       )}

@@ -1,8 +1,11 @@
 import Dexie, { type Table } from 'dexie';
 import type {
+  BodyMetricRow,
   DailyMetricRow,
   ExerciseRow,
   GymSetRow,
+  ProgramRow,
+  ProteinDayRow,
   SettingRow,
   SleepRecordRow,
 } from './types';
@@ -13,6 +16,9 @@ export class DashboardDb extends Dexie {
   settings!: Table<SettingRow, string>;
   exercises!: Table<ExerciseRow, number>;
   gymSets!: Table<GymSetRow, number>;
+  programs!: Table<ProgramRow, [string, string]>;
+  bodyMetrics!: Table<BodyMetricRow, [string, string]>;
+  proteinDays!: Table<ProteinDayRow, string>;
 
   constructor() {
     super('personal-dashboard');
@@ -25,6 +31,13 @@ export class DashboardDb extends Dexie {
     this.version(2).stores({
       exercises: '++id, name',
       gymSets: '++id, exerciseId, date, at',
+    });
+    // フェーズ2b: プログラム実行支援(G-F6〜G-F11)
+    // programs は自然キー [programName+validFrom] で世代管理(再取込に冪等)
+    this.version(3).stores({
+      programs: '[programName+validFrom], validFrom',
+      bodyMetrics: '[metric+date], date',
+      proteinDays: 'date',
     });
   }
 }

@@ -573,3 +573,186 @@ button.danger.small {
   gap: 8px;
   flex: 0 0 auto;
 }
+
+/* --- ジム フェーズ2b --- */
+
+.segment-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.segment-bar button {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.segment-bar button.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 12px rgb(99 102 241 / 0.45);
+}
+
+.segment-more {
+  flex: 0 0 40px !important;
+  font-size: 16px !important;
+}
+
+.menu-card {
+  border-color: rgb(129 140 248 / 0.4);
+}
+
+.chip-badge {
+  margin-left: 6px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.chip.disabled {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+.protein-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #0e1628;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.protein-toggle.yes {
+  border-color: #16a34a;
+  color: #4ade80;
+  box-shadow: 0 0 14px rgb(22 163 74 / 0.3);
+}
+
+.protein-toggle.no {
+  border-color: rgb(248 113 113 / 0.5);
+  color: var(--danger);
+}
+
+.protein-state {
+  font-weight: 600;
+}
+
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.menu-target {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: right;
+}
+
+.today-highlight {
+  border-color: rgb(129 140 248 / 0.5);
+  box-shadow: 0 0 18px rgb(99 102 241 / 0.2);
+}
+
+.body-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.body-input-row .stepper {
+  flex: 1;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.kpi-cell {
+  background: linear-gradient(180deg, #16203a 0%, #121a30 100%);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.kpi-value {
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  text-shadow: 0 0 16px rgb(129 140 248 / 0.5);
+}
+
+.kpi-value small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 2px;
+  text-shadow: none;
+}
+
+.kpi-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.kpi-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.kpi-row-value {
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delta-up {
+  color: #4ade80;
+  font-size: 12px;
+}
+
+.delta-down {
+  color: var(--danger);
+  font-size: 12px;
+}

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "programName": "2026-07 筋肥大期 v1",
+  "validFrom": "2026-07-06",
+  "validUntil": "2026-08-02",
+  "weeklySchedule": [
+    {
+      "dayOfWeek": "Mon",
+      "focus": "胸・三頭",
+      "exercises": [
+        { "name": "ベンチプレス", "sets": 3, "reps": "8-10", "note": "前回e1RMの75%目安" },
+        { "name": "インクラインダンベルプレス", "sets": 3, "reps": "10-12", "note": "" },
+        { "name": "トライセプスエクステンション", "sets": 3, "reps": "10-12", "note": "" }
+      ]
+    },
+    {
+      "dayOfWeek": "Wed",
+      "focus": "背中・二頭",
+      "exercises": [
+        { "name": "ラットプルダウン", "sets": 3, "reps": "8-10", "note": "" },
+        { "name": "シーテッドロー", "sets": 3, "reps": "10-12", "note": "" },
+        { "name": "アームカール", "sets": 3, "reps": "10-12", "note": "" }
+      ]
+    },
+    {
+      "dayOfWeek": "Fri",
+      "focus": "脚・肩",
+      "exercises": [
+        { "name": "スクワット", "sets": 3, "reps": "8-10", "note": "" },
+        { "name": "レッグプレス", "sets": 3, "reps": "10-12", "note": "" },
+        { "name": "ショルダープレス", "sets": 3, "reps": "10-12", "note": "" },
+        { "name": "サイドレイズ", "sets": 3, "reps": "12-15", "note": "" }
+      ]
+    }
+  ],
+  "nutritionTargets": { "proteinGramsPerDay": 140, "note": "体重×2g目安。簡潔メニュー方針" },
+  "bodyMetricsToTrack": ["weight", "bodyFatPct", "chest", "arm", "waist", "thigh"]
+}

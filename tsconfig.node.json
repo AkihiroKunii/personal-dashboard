@@ -12,5 +12,12 @@
     "strict": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vitest.config.ts"]
+  "include": [
+    "vite.config.ts",
+    "vitest.config.ts",
+    "src/features/gym/lib/ics.ts",
+    "src/features/gym/lib/programSchema.ts",
+    "src/core/dates.ts",
+    "src/core/types.ts"
+  ]
 }

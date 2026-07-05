@@ -63,6 +63,59 @@ export interface GymSetRow {
   reps: number;
 }
 
+export type DayOfWeek = 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat';
+
+/** 週間プログラム(§2.3a schemaVersion 1)の1日分 */
+export interface ProgramExercise {
+  name: string;
+  sets: number;
+  reps: string;
+  note?: string;
+}
+
+export interface ProgramDay {
+  dayOfWeek: DayOfWeek;
+  focus: string;
+  exercises: ProgramExercise[];
+}
+
+/** プログラムJSONの中身(パース済み・DB非依存) */
+export interface ProgramContent {
+  programName: string;
+  validFrom: string;
+  validUntil: string;
+  weeklySchedule: ProgramDay[];
+  nutritionTargets?: { proteinGramsPerDay?: number; note?: string };
+  bodyMetricsToTrack?: string[];
+}
+
+/**
+ * 取込済みプログラム(G-F6)。主キーは [programName+validFrom] の自然キー。
+ * 同一世代の再取込は上書きになり重複しない(自動フェッチの再実行に対して冪等)。
+ */
+export interface ProgramRow extends ProgramContent {
+  importedAt: number;
+  /** 取込元テキスト。自動フェッチの差分判定に使う */
+  raw: string;
+}
+
+/** ボディ記録の指標(G-F8) */
+export const BODY_METRICS = ['weight', 'bodyFatPct', 'chest', 'arm', 'waist', 'thigh'] as const;
+export type BodyMetricId = (typeof BODY_METRICS)[number];
+
+/** ボディ記録の1点。主キー [metric+date](同一キーは上書き) */
+export interface BodyMetricRow {
+  metric: BodyMetricId;
+  date: string;
+  value: number;
+}
+
+/** タンパク質目標の日次二値記録(G-F9)。主キー date */
+export interface ProteinDayRow {
+  date: string;
+  achieved: boolean;
+}
+
 /** パーサの出力。importer が IndexedDB へ冪等保存する */
 export interface ImportResult {
   dailyMetrics: DailyMetricRow[];

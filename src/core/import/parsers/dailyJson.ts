@@ -2,6 +2,7 @@ import { parseIsoWithOffset } from '../../dates';
 import { mapJsonStage } from '../../health/stageMap';
 import { DAILY_EXPORT_SOURCE, normalizeSourceName } from '../../health/sources';
 import type { DailyMetricRow, ImportResult, SleepRecordRow } from '../../types';
+import { saveImportResult } from '../importer';
 import type { RegisteredParser } from '../registry';
 
 // 日次エクスポートJSON(§1.3a schemaVersion 2)のパーサ。
@@ -86,9 +87,30 @@ export function parseDailyExportJson(text: string): ImportResult {
   return { dailyMetrics, sleepRecords, warnings };
 }
 
+/** 日次エクスポートJSONらしいか(プログラムJSONとの内容判別に使う) */
+export function looksLikeDailyExportJson(text: string): boolean {
+  try {
+    const raw = JSON.parse(text) as Record<string, unknown>;
+    return toNumber(raw?.schemaVersion) === 2 && typeof raw?.date === 'string';
+  } catch {
+    return false;
+  }
+}
+
+async function importDailyText(text: string) {
+  const summary = await saveImportResult(parseDailyExportJson(text));
+  const range = summary.dateRange ? `(${summary.dateRange[0]}〜${summary.dateRange[1]})` : '';
+  return {
+    message: `指標${summary.metricCount}件・睡眠${summary.sleepCount}件を保存しました${range}`,
+    warnings: summary.warnings,
+  };
+}
+
 export const dailyJsonParser: RegisteredParser = {
   id: 'daily-export-json',
   displayName: '日次エクスポートJSON(ショートカット)',
   matches: (fileName) => /\.json$/i.test(fileName),
-  parse: async (file) => parseDailyExportJson(await file.text()),
+  canParseText: looksLikeDailyExportJson,
+  importText: importDailyText,
+  importFile: async (file) => importDailyText(await file.text()),
 };

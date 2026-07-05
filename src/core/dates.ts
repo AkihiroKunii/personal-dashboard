@@ -30,6 +30,13 @@ export function todayJst(): string {
   return jstDateOf(Date.now());
 }
 
+const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
+
+/** YYYY-MM-DD の曜日(プログラムJSONの dayOfWeek 表記と同じ英3文字) */
+export function dowOf(date: string): (typeof DAYS_OF_WEEK)[number] {
+  return DAYS_OF_WEEK[new Date(`${date}T00:00:00Z`).getUTCDay()];
+}
+
 /** ISO 8601(オフセット付き。例 2026-07-04T23:12:00+09:00)→ epoch ms */
 export function parseIsoWithOffset(s: string): number {
   const t = Date.parse(s);

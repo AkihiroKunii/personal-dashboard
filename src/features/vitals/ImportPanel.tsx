@@ -18,15 +18,12 @@ export function ImportPanel() {
       for (const file of Array.from(files)) {
         setProgress(`${file.name} を取込中…`);
         try {
-          const summary = await importFile(file, (ratio) => {
+          const outcome = await importFile(file, (ratio) => {
             setProgress(`${file.name} を取込中… ${Math.floor(ratio * 100)}%`);
           });
-          const range = summary.dateRange ? `(${summary.dateRange[0]}〜${summary.dateRange[1]})` : '';
-          toast(
-            `${file.name}: 指標${summary.metricCount}件・睡眠${summary.sleepCount}件を保存しました${range}`,
-          );
-          if (summary.warnings.length > 0) {
-            console.warn(`${file.name}:`, summary.warnings);
+          toast(`${file.name}: ${outcome.message}`);
+          if (outcome.warnings.length > 0) {
+            console.warn(`${file.name}:`, outcome.warnings);
           }
         } catch (e) {
           toast(`${file.name}: ${e instanceof Error ? e.message : String(e)}`, 'error');
