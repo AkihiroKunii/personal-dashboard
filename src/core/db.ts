@@ -1,5 +1,13 @@
 import Dexie, { type Table } from 'dexie';
 import type {
+  HabitLadderRow,
+  HabitPlanRow,
+  HabitSpecRow,
+  HabitStateRow,
+  HabitWindowRow,
+  StoredObservation,
+} from './habitTypes';
+import type {
   BodyMetricRow,
   DailyMetricRow,
   ExerciseRow,
@@ -19,6 +27,12 @@ export class DashboardDb extends Dexie {
   programs!: Table<ProgramRow, [string, string]>;
   bodyMetrics!: Table<BodyMetricRow, [string, string]>;
   proteinDays!: Table<ProteinDayRow, string>;
+  habitWindows!: Table<HabitWindowRow, string>;
+  habitSpecs!: Table<HabitSpecRow, string>;
+  habitLadders!: Table<HabitLadderRow, string>;
+  habitObservations!: Table<StoredObservation, number>;
+  habitStates!: Table<HabitStateRow, [string, string]>;
+  habitPlans!: Table<HabitPlanRow, string>;
 
   constructor() {
     super('personal-dashboard');
@@ -38,6 +52,15 @@ export class DashboardDb extends Dexie {
       programs: '[programName+validFrom], validFrom',
       bodyMetrics: '[metric+date], date',
       proteinDays: 'date',
+    });
+    // フェーズ3: 習慣化(④)。エンジンは packages/habit-engine、ここは永続化のみ
+    this.version(4).stores({
+      habitWindows: 'id',
+      habitSpecs: 'id',
+      habitLadders: 'habitId',
+      habitObservations: '++id, habitId, date, [habitId+contextKey]',
+      habitStates: '[habitId+contextKey]',
+      habitPlans: 'weekStart',
     });
   }
 }

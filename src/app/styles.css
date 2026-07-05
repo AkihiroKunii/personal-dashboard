@@ -756,3 +756,199 @@ button.danger.small {
   color: var(--danger);
   font-size: 12px;
 }
+
+/* --- 習慣(フェーズ3) --- */
+
+.momentum-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.momentum-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.momentum-name {
+  font-size: 14px;
+}
+
+.momentum-badge {
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+.momentum-track {
+  height: 8px;
+  background: #0e1628;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.momentum-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.momentum-value {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.recovery-card {
+  border-color: rgb(251 113 133 / 0.4);
+}
+
+.recovery-item {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.recovery-activity {
+  font-size: 13px;
+  color: #fb7185;
+  font-weight: 600;
+}
+
+.recovery-message {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.checkin-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.checkin-row.done {
+  opacity: 0.7;
+}
+
+.checkin-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.checkin-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.checkin-anchor {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.checkin-step {
+  font-size: 14px;
+}
+
+.checkin-done {
+  width: auto;
+  padding: 10px 22px;
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+.checkin-detail {
+  margin-top: 8px;
+}
+
+.effort-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 12px 0 5px;
+}
+
+.full-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0e1628;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.ladder-edit {
+  margin: 8px 0;
+}
+
+.ladder-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+
+.ladder-kind {
+  width: 3em;
+  font-size: 12px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.ladder-step input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #0e1628;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.ladder-min {
+  width: 56px;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #0e1628;
+  color: var(--text);
+  font-size: 13px;
+  text-align: center;
+}
+
+.activity-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.review-line {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 4px 0 10px;
+}
+
+.review-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.review-metrics > div {
+  background: #0e1628;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
