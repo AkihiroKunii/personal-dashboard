@@ -4,6 +4,7 @@ import { RANGE_DAYS, RangeSwitcher, type RangeKey } from '../../core/charts/Rang
 import { TimeSeriesChart } from '../../core/charts/TimeSeriesChart';
 import { addDays, todayJst } from '../../core/dates';
 import { latestDataDate, type MetricId } from '../../core/health/dailySeries';
+import { BackupPanel } from '../backup/BackupPanel';
 import { DataPanel } from './DataPanel';
 import { ImportPanel } from './ImportPanel';
 import { METRIC_DEFS, METRIC_IDS } from './metricDefs';
@@ -99,6 +100,7 @@ export function VitalsPage() {
       <OverlayCard from={from} to={to} />
       <ImportPanel />
       <DataPanel />
+      <BackupPanel />
     </div>
   );
 }
