@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type ReactElement } from 'react';
 import {
   Area,
   Bar,
@@ -50,14 +50,23 @@ export function TimeSeriesChart({
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   if (series.length === 0) return null;
 
+  const dotKey = (id: string) => `${id}__dot`;
   const dates = series[0].points.map((p) => p.date);
   const data: MergedRow[] = dates.map((date, i) => {
     const row: MergedRow = { date };
     for (const s of series) {
       const p = s.points[i];
-      row[s.id] = p?.value ?? null;
+      const val = p?.value ?? null;
+      row[s.id] = val;
       if (s.errorBars && p && p.value !== null && p.min !== undefined && p.max !== undefined) {
         row[`${s.id}__err`] = [p.value - p.min, p.max - p.value];
+      }
+      // 孤立点(前後が欠測)は線分が描けないため、行に印を付けて後でドットを打つ。
+      // 疎な系列(ジムの週2〜3回・単日バイタル等)で必須
+      if (val !== null) {
+        const prev = s.points[i - 1]?.value ?? null;
+        const next = s.points[i + 1]?.value ?? null;
+        if (prev === null && next === null) row[dotKey(s.id)] = val;
       }
     }
     return row;
@@ -66,27 +75,15 @@ export function TimeSeriesChart({
   const hasRightAxis = series.some((s) => s.axis === 'right');
   const gradId = (s: ChartSeriesDef) => `grad-${uid}-${s.id}`;
 
-  // 孤立点(前後が欠測)は線分が描けないため、その点にだけドットを打つ。
-  // ジムの記録(週2〜3回)のような疎な系列で必須
-  const isolatedDot =
-    (s: ChartSeriesDef) =>
-    (props: { cx?: number; cy?: number; index?: number }) => {
-      const i = props.index ?? 0;
-      const val = data[i]?.[s.id];
-      const prev = i > 0 ? data[i - 1][s.id] : null;
-      const next = i < data.length - 1 ? data[i + 1][s.id] : null;
-      const show =
-        val != null && prev == null && next == null && props.cx != null && props.cy != null;
-      return (
-        <circle
-          key={`${s.id}-dot-${i}`}
-          cx={props.cx}
-          cy={props.cy}
-          r={show ? 3 : 0}
-          fill={s.color}
-        />
-      );
+  // props.payload(その点のデータ行)から孤立フラグを読む。配列を index で引かないので範囲外にならない
+  // (Recharts が dot 要素のキーを付与するため、こちらでは key を指定しない)
+  const isolatedDot = (s: ChartSeriesDef) => {
+    const render = (props: { cx?: number; cy?: number; payload?: MergedRow }) => {
+      const show = props.payload?.[dotKey(s.id)] != null && props.cx != null && props.cy != null;
+      return <circle cx={props.cx} cy={props.cy} r={show ? 3 : 0} fill={s.color} />;
     };
+    return render as unknown as (props: unknown) => ReactElement;
+  };
   const formatTick = (date: string) => {
     const [, m, d] = date.split('-');
     return dates.length > 120 && d !== '01' ? '' : `${Number(m)}/${Number(d)}`;

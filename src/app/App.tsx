@@ -5,6 +5,7 @@ import { importFromFragment } from '../core/import/urlImport';
 import { GymPage } from '../features/gym/GymPage';
 import { HabitPage } from '../features/habit/HabitPage';
 import { VitalsPage } from '../features/vitals/VitalsPage';
+import { VitalSummaryBanner } from '../features/vitals/VitalSummaryBanner';
 import { seedExercisesIfEmpty } from '../features/gym/lib/exercises';
 import { importProgramText } from '../features/gym/lib/program';
 import { programJsonParser } from '../features/gym/lib/programParser';
@@ -48,6 +49,8 @@ const TABS: Array<{ id: TabId; label: string; icon: string }> = [
 
 function AppInner() {
   const [tab, setTab] = useState<TabId>('vitals');
+  // 朝の取込直後に「その晩のバイタルサマリ」を出す(×で閉じられる)
+  const [showVitalSummary, setShowVitalSummary] = useState(false);
   const toast = useToast();
 
   // V-F7: #import= 付きで開かれたら自動取込(フラグメントは即破棄される)
@@ -58,6 +61,7 @@ function AppInner() {
           toast(
             `自動取込が完了しました(指標${summary.metricCount}件・睡眠${summary.sleepCount}件)`,
           );
+          setShowVitalSummary(true);
         }
       })
       .catch((e: unknown) => {
@@ -79,6 +83,7 @@ function AppInner() {
   return (
     <div className="app">
       <main className="app-main">
+        {showVitalSummary && <VitalSummaryBanner onClose={() => setShowVitalSummary(false)} />}
         {tab === 'vitals' && <VitalsPage />}
         {tab === 'gym' && <GymPage />}
         {tab === 'habit' && <HabitPage />}

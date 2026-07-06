@@ -952,3 +952,78 @@ button.danger.small {
   flex-direction: column;
   gap: 2px;
 }
+
+/* --- 朝のバイタルサマリ --- */
+
+.summary-banner {
+  background: linear-gradient(180deg, #1a2540 0%, #131c31 100%);
+  border: 1px solid rgb(129 140 248 / 0.4);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgb(2 6 18 / 0.4);
+}
+
+.summary-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.summary-head h2 {
+  font-size: 14px;
+  margin: 0;
+  color: var(--text);
+}
+
+.summary-close {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  background: #0e1628;
+  color: var(--muted);
+  border-radius: 8px;
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+
+.summary-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.summary-value {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 14px currentColor;
+  text-align: right;
+}
+
+.summary-value small {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 3px;
+  text-shadow: none;
+}
