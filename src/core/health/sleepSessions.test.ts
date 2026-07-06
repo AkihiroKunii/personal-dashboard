@@ -2,7 +2,12 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parseDailyExportJson } from '../import/parsers/dailyJson';
 import type { SleepRecordRow } from '../types';
-import { buildSessions, dailySleepBySource, sessionDateOf } from './sleepSessions';
+import {
+  buildSessions,
+  dailySleepBySource,
+  dailyStageMinutesBySource,
+  sessionDateOf,
+} from './sleepSessions';
 
 const sampleJson = readFileSync('docs/samples/daily_export_sample.json', 'utf8');
 
@@ -34,6 +39,35 @@ describe('睡眠セッション(連続セッション単位・起床日基準 §
     expect(s.asleepMinutes).toBeCloseTo(expectedMinutes, 5);
     // セッション全長(約13.2時間)よりAwake分だけ短い
     expect(s.asleepMinutes).toBeLessThan((s.end - s.start) / 60_000 - 3 * 60 + 60);
+  });
+
+  it('ステージ別分数: core/deep/rem の合計が実睡眠時間と一致、awake/inBedは睡眠に含めない', () => {
+    const { sleepRecords } = parseDailyExportJson(sampleJson);
+    const [s] = buildSessions(sleepRecords);
+    const sm = s.stageMinutes;
+    // サンプルは core/rem/awake のみ(deep もあり)。睡眠算入ステージの合計 ≒ asleepMinutes
+    expect(sm.core + sm.deep + sm.rem + sm.asleep).toBeCloseTo(s.asleepMinutes, 5);
+    expect(sm.awake).toBeGreaterThan(0); // Awake は記録されるが
+    // 各ステージは実レコードの合算と一致
+    const sumStage = (stage: SleepRecordRow['stage']) =>
+      sleepRecords
+        .filter((r) => r.stage === stage)
+        .reduce((acc, r) => acc + (r.end - r.start) / 60_000, 0);
+    expect(sm.deep).toBeCloseTo(sumStage('deep'), 5);
+    expect(sm.rem).toBeCloseTo(sumStage('rem'), 5);
+  });
+
+  it('dailyStageMinutesBySource は帰属日×ソースでステージ別に集計する', () => {
+    const records = [
+      rec('2026-07-04T01:00:00+09:00', '2026-07-04T02:00:00+09:00', 'deep', 'A'),
+      rec('2026-07-04T02:00:00+09:00', '2026-07-04T03:00:00+09:00', 'core', 'A'),
+      rec('2026-07-04T03:00:00+09:00', '2026-07-04T03:30:00+09:00', 'awake', 'A'),
+    ];
+    const bySource = dailyStageMinutesBySource(records).get('2026-07-04')!.get('A')!;
+    expect(bySource.deep).toBe(60);
+    expect(bySource.core).toBe(60);
+    expect(bySource.awake).toBe(30);
+    expect(bySource.rem).toBe(0);
   });
 
   it('隙間が閾値を超えるとセッションが分割される', () => {

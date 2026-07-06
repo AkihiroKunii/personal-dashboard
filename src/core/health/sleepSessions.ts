@@ -1,5 +1,5 @@
 import { addDays, jstDateOf, jstHourOf } from '../dates';
-import type { SleepRecordRow } from '../types';
+import type { SleepRecordRow, SleepStage } from '../types';
 import { ASLEEP_STAGES } from './stageMap';
 
 // 睡眠の帰属は「連続セッション単位・起床日基準」(§1.4 + ユーザー確認済み)。
@@ -16,7 +16,19 @@ export interface SleepSession {
   date: string;
   /** 実睡眠分数(InBed/Awake除外、区間の重複は二重計上しない) */
   asleepMinutes: number;
+  /** ステージ別分数(同一ソースの連続レコードは重複しないので単純合算) */
+  stageMinutes: Record<SleepStage, number>;
   records: SleepRecordRow[];
+}
+
+function emptyStageMinutes(): Record<SleepStage, number> {
+  return { inBed: 0, awake: 0, core: 0, deep: 0, rem: 0, asleep: 0 };
+}
+
+function stageMinutesOf(records: SleepRecordRow[]): Record<SleepStage, number> {
+  const acc = emptyStageMinutes();
+  for (const r of records) acc[r.stage] += (r.end - r.start) / 60_000;
+  return acc;
 }
 
 /** セッション開始時刻から帰属日を決める(起床日基準) */
@@ -71,6 +83,7 @@ export function buildSessions(
         asleepMinutes: unionMinutes(
           current.filter((r) => ASLEEP_STAGES.has(r.stage)).map((r) => [r.start, r.end]),
         ),
+        stageMinutes: stageMinutesOf(current),
         records: current,
       });
       current = [];
@@ -93,6 +106,21 @@ export function dailySleepBySource(records: SleepRecordRow[]): Map<string, Map<s
     let bySource = byDate.get(s.date);
     if (!bySource) byDate.set(s.date, (bySource = new Map()));
     bySource.set(s.source, (bySource.get(s.source) ?? 0) + s.asleepMinutes);
+  }
+  return byDate;
+}
+
+/** 帰属日 → ソース → ステージ別分数(同日同ソースの複数セッションは合算) */
+export function dailyStageMinutesBySource(
+  records: SleepRecordRow[],
+): Map<string, Map<string, Record<SleepStage, number>>> {
+  const byDate = new Map<string, Map<string, Record<SleepStage, number>>>();
+  for (const s of buildSessions(records)) {
+    let bySource = byDate.get(s.date);
+    if (!bySource) byDate.set(s.date, (bySource = new Map()));
+    const acc = bySource.get(s.source) ?? emptyStageMinutes();
+    for (const stage of Object.keys(acc) as SleepStage[]) acc[stage] += s.stageMinutes[stage];
+    bySource.set(s.source, acc);
   }
   return byDate;
 }

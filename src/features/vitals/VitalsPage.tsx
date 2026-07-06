@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { RANGE_DAYS, RangeSwitcher, type RangeKey } from '../../core/charts/RangeSwitcher';
 import { TimeSeriesChart } from '../../core/charts/TimeSeriesChart';
 import { addDays, todayJst } from '../../core/dates';
@@ -8,6 +8,7 @@ import { BackupPanel } from '../backup/BackupPanel';
 import { DataPanel } from './DataPanel';
 import { ImportPanel } from './ImportPanel';
 import { METRIC_DEFS, METRIC_IDS } from './metricDefs';
+import { SleepStageCard } from './SleepStageCard';
 import { useSeries } from './useSeries';
 
 function MetricCard({ metric, from, to }: { metric: MetricId; from: string; to: string }) {
@@ -95,7 +96,11 @@ export function VitalsPage() {
       <h1>バイタル</h1>
       <RangeSwitcher value={range} onChange={setRange} />
       {METRIC_IDS.map((id) => (
-        <MetricCard key={id} metric={id} from={from} to={to} />
+        <Fragment key={id}>
+          <MetricCard metric={id} from={from} to={to} />
+          {/* 合計睡眠時間の直後にステージ内訳を出す(§1.4 拡張) */}
+          {id === 'sleep' && <SleepStageCard from={from} to={to} />}
+        </Fragment>
       ))}
       <OverlayCard from={from} to={to} />
       <ImportPanel />

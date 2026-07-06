@@ -40,7 +40,7 @@ src/core/                        # 共通層: db, 日付, インポート基盤,
   core/import/registry.ts        # パーサ登録制。新データ形式はここに登録する(①JSON/XML・③プログラムJSON・④が同じ枠組みに乗る)
   core/health/stageMap.ts        # 睡眠ステージ表記のマッピング表(集約箇所。ここ以外で表記文字列を解釈しない)
   core/health/sources.ts         # ソース名正規化・優先ソース解決(集約箇所)
-  core/charts/TimeSeriesChart.tsx# 共通日次時系列チャート(範囲切替・2軸・エラーバー)
+  core/charts/TimeSeriesChart.tsx# 共通日次時系列チャート(範囲切替・2軸・エラーバー)。積み上げ棒は非対応(Rechartsの多チャート同居でスケールが崩れるため、睡眠ステージは専用 features/vitals/SleepStageChart.tsx で描く)
 src/features/vitals|gym|habit/   # 機能別UI
 packages/habit-engine/           # ④エンジン(フェーズ3で作成。純粋関数・UI非依存・単体テスト必須)
 ```

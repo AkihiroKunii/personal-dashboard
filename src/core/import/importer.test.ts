@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '../db';
-import { loadMetricSeries, loadSleepSeries } from '../health/dailySeries';
+import { loadMetricSeries, loadSleepSeries, loadSleepStageSeries } from '../health/dailySeries';
 import { saveImportResult } from './importer';
 import { HealthXmlAggregator } from './parsers/appleHealthXml';
 import { parseDailyExportJson } from './parsers/dailyJson';
@@ -87,5 +87,36 @@ describe('冪等インポート(V-F3)', () => {
     await saveImportResult(parseDailyExportJson(sampleJson));
     const series = await loadMetricSeries('steps', '2026-07-03', '2026-07-05', []);
     expect(series.map((p) => p.value)).toEqual([null, 5311, null]);
+  });
+});
+
+describe('睡眠ステージ系列(§1.4 拡張)', () => {
+  it('deep/core/rem/other の合計が合計睡眠時間と一致し、欠測日はnull', async () => {
+    await saveImportResult(parseDailyExportJson(sampleJson));
+    const stages = await loadSleepStageSeries('2026-07-03', '2026-07-05', []);
+    // 7/4に帰属、前後はnull
+    expect(stages.deep.map((p) => p.value === null)).toEqual([true, false, true]);
+
+    const total = await loadSleepSeries('2026-07-04', '2026-07-04', []);
+    const sum =
+      (stages.deep[1].value ?? 0) +
+      (stages.core[1].value ?? 0) +
+      (stages.rem[1].value ?? 0) +
+      (stages.other[1].value ?? 0);
+    expect(sum).toBeCloseTo(total[0].value!, 1);
+    expect(stages.deep[1].value).toBeGreaterThan(0);
+  });
+
+  it('優先ソース設定で1ソースのみ採用する(合算しない)', async () => {
+    // XML(Apple Watch)とJSON(空source)が同じ夜を持つ。既定は日次エクスポート優先
+    await saveImportResult(parseXml(excerptXml));
+    await saveImportResult(parseDailyExportJson(sampleJson));
+    const jsonOnlyHours =
+      parseDailyExportJson(sampleJson)
+        .sleepRecords.filter((r) => r.stage === 'deep')
+        .reduce((acc, r) => acc + (r.end - r.start) / 60_000, 0) / 60;
+    const stages = await loadSleepStageSeries('2026-07-04', '2026-07-04', []);
+    // JSONソースのdeepのみ(XMLと合算していない)。表示は0.01時間丸めなので1桁で比較
+    expect(stages.deep[0].value).toBeCloseTo(jsonOnlyHours, 1);
   });
 });
