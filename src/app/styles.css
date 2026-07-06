@@ -1012,6 +1012,13 @@ button.danger.small {
   flex: 0 0 auto;
 }
 
+.summary-figures {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
 .summary-value {
   font-size: 18px;
   font-weight: 700;
@@ -1026,4 +1033,17 @@ button.danger.small {
   color: var(--muted);
   margin-left: 3px;
   text-shadow: none;
+}
+
+.summary-compare {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 上下は判断ではなく方向のみ(指標により良し悪しが逆のため色は中立) */
+.summary-delta {
+  margin-left: 6px;
+  font-weight: 600;
+  color: #aab6cc;
 }
