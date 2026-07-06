@@ -1047,3 +1047,18 @@ button.danger.small {
   font-weight: 600;
   color: #aab6cc;
 }
+
+/* --- コーチング改訂リマインダー --- */
+
+.coaching-reminder {
+  background: linear-gradient(180deg, #2a2140 0%, #131c31 100%);
+  border: 1px solid rgb(167 139 250 / 0.45);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgb(2 6 18 / 0.4);
+}
+
+.coaching-reminder .summary-head h2 {
+  color: #c4b5fd;
+}

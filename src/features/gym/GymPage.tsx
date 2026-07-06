@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BodyView } from './BodyView';
 import { ChartsView } from './ChartsView';
+import { CoachingReminder } from './CoachingReminder';
 import { ExercisesView } from './ExercisesView';
 import { KpiView } from './KpiView';
 import { PlanView } from './PlanView';
@@ -28,6 +29,7 @@ export function GymPage() {
   return (
     <div className="page">
       <h1>ジム</h1>
+      <CoachingReminder />
       <div className="segment-bar" role="tablist" aria-label="ジム画面切替">
         {VIEWS.map((v) => (
           <button

@@ -36,6 +36,12 @@ describe('ics生成(G-F7)', () => {
     expect(lines).toContain('DTSTART;VALUE=DATE:20260713');
   });
 
+  it('有効期限日にコーチング改訂イベントが1件入る', () => {
+    const coaching = lines.filter((l) => l.startsWith('UID:') && l.includes('-coaching@'));
+    expect(coaching).toEqual(['UID:20260802-coaching@personal-dashboard']);
+    expect(lines).toContain('DTSTART;VALUE=DATE:20260802');
+  });
+
   it('UIDは決定的(同一入力→同一出力で購読側の重複を防ぐ)', () => {
     expect(buildProgramIcs(program)).toBe(ics);
     expect(lines).toContain('UID:2026-07-06-day@personal-dashboard');

@@ -117,6 +117,17 @@ export function buildProgramIcs(program: ProgramContent): string {
     }
   }
 
+  // (c) 有効期限日にコーチング改訂の予定(初期構想: 月1程度のプラン見直し)
+  lines.push(
+    ...vevent([
+      `UID:${dateBasic(program.validUntil)}-coaching@personal-dashboard`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART;VALUE=DATE:${dateBasic(program.validUntil)}`,
+      `SUMMARY:${escapeText('コーチングセッション: プランを更新')}`,
+      `DESCRIPTION:${escapeText('Claudeとの対話でトレーニングプランを改訂する時期です。アプリの「コーチング用サマリーを出力」を持ち込みましょう。')}`,
+    ]),
+  );
+
   lines.push('END:VCALENDAR');
   return lines.map(foldLine).join('\r\n') + '\r\n';
 }

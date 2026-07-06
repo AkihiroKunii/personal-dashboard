@@ -8,13 +8,8 @@ import { getSourcePriority } from '../../core/settings';
 import type { ExerciseRow } from '../../core/types';
 import { BODY_METRIC_DEFS } from './bodyMetricDefs';
 import { loadBodySeries } from './lib/bodyProtein';
-import {
-  adherence,
-  buildCoachingSummary,
-  e1rmChanges,
-  proteinSummary,
-  setsByMuscleGroup,
-} from './lib/kpi';
+import { runCoachingExport } from './lib/coachingExport';
+import { adherence, e1rmChanges, proteinSummary, setsByMuscleGroup } from './lib/kpi';
 import { activeProgramOn } from './lib/program';
 import { MUSCLE_COLORS } from './muscleColors';
 
@@ -60,37 +55,15 @@ export function KpiView() {
   const isEmpty = sets.length === 0 && proteinDays.length === 0;
 
   const exportSummary = async () => {
-    const priority = await getSourcePriority();
-    const period = { from: program?.validFrom ?? from90, to: today };
-    const bodyRows = await db.bodyMetrics
-      .where('date')
-      .between(period.from, period.to, true, true)
-      .toArray();
-    const sleepPeriod = await loadSleepSeries(period.from, period.to, priority);
-    const sVals = sleepPeriod.map((p) => p.value).filter((v): v is number => v !== null);
-    const { json, text } = buildCoachingSummary({
-      period,
-      programName: program?.programName,
-      exercisesById: byId,
-      sets: sets.filter((s) => s.date >= period.from),
-      program: program ?? undefined,
-      bodyRows,
-      proteinDays,
-      sleepAvgHours: sVals.length > 0 ? sVals.reduce((a, b) => a + b, 0) / sVals.length : undefined,
-    });
-    const payload = `${text}\n\n---\n\`\`\`json\n${JSON.stringify(json, null, 2)}\n\`\`\`\n`;
     try {
-      await navigator.clipboard.writeText(payload);
-      toast('コーチング用サマリーをクリップボードにコピーしました');
-    } catch {
-      const blob = new Blob([payload], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `coaching-summary-${today}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast('コーチング用サマリーをダウンロードしました');
+      const result = await runCoachingExport();
+      toast(
+        result === 'copied'
+          ? 'コーチング用サマリーをクリップボードにコピーしました'
+          : 'コーチング用サマリーをダウンロードしました',
+      );
+    } catch (e) {
+      toast(e instanceof Error ? e.message : String(e), 'error');
     }
   };
 
