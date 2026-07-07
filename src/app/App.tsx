@@ -49,8 +49,9 @@ const TABS: Array<{ id: TabId; label: string; icon: string }> = [
 
 function AppInner() {
   const [tab, setTab] = useState<TabId>('vitals');
-  // 朝の取込直後に「その晩のバイタルサマリ」を出す(×で閉じられる)
-  const [showVitalSummary, setShowVitalSummary] = useState(false);
+  // バイタルサマリは「開いたときに直近データがあれば出す」(×でそのセッション中は閉じる)。
+  // 朝の取込フローに限らず、通常起動でも直近の値を比較表示する。
+  const [summaryDismissed, setSummaryDismissed] = useState(false);
   const toast = useToast();
 
   // V-F7: #import= 付きで開かれたら自動取込(フラグメントは即破棄される)
@@ -61,7 +62,6 @@ function AppInner() {
           toast(
             `自動取込が完了しました(指標${summary.metricCount}件・睡眠${summary.sleepCount}件)`,
           );
-          setShowVitalSummary(true);
         }
       })
       .catch((e: unknown) => {
@@ -83,7 +83,9 @@ function AppInner() {
   return (
     <div className="app">
       <main className="app-main">
-        {showVitalSummary && <VitalSummaryBanner onClose={() => setShowVitalSummary(false)} />}
+        {tab === 'vitals' && !summaryDismissed && (
+          <VitalSummaryBanner onClose={() => setSummaryDismissed(true)} />
+        )}
         {tab === 'vitals' && <VitalsPage />}
         {tab === 'gym' && <GymPage />}
         {tab === 'habit' && <HabitPage />}

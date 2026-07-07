@@ -3,7 +3,7 @@ import type { MetricId } from '../../core/health/dailySeries';
 import { METRIC_DEFS } from './metricDefs';
 import { loadLatestVitals, type VitalSummaryEntry } from './vitalSummary';
 
-// 朝の取込直後に出す「その晩のバイタルサマリ」。×ボタンで閉じられる(V-F 補助)。
+// 開いたときに直近のバイタルを比較表示する(×で閉じる)。日付を併記して鮮度が分かるようにする。
 
 const ORDER: MetricId[] = ['sleep', 'hrvSdnn', 'restingHr', 'steps', 'heartRate'];
 
@@ -63,12 +63,12 @@ export function VitalSummaryBanner({ onClose }: { onClose: () => void }) {
   const latestDate = entries
     .map((m) => summary[m]!.date)
     .sort()
-    .at(-1);
+    .at(-1)!;
 
   return (
     <section className="summary-banner" role="status">
       <div className="summary-head">
-        <h2>今朝のバイタル{latestDate ? ` · ${latestDate.slice(5).replace('-', '/')}` : ''}</h2>
+        <h2>最近のバイタル · {latestDate.slice(5).replace('-', '/')}</h2>
         <button className="summary-close" aria-label="閉じる" onClick={onClose}>
           ✕
         </button>
